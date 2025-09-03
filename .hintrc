@@ -1,0 +1,69 @@
+{
+  "extends": [
+    "development"
+  ],
+  "hints": {
+    "axe/name-role-value": [
+      "default",
+      {
+        "link-name": "off",
+        "button-name": "off"
+      }
+    ],
+    "axe/keyboard": [
+      "default",
+      {
+        "nested-interactive": "off"
+      }
+    ],
+    "button-type": "off",
+    "axe/text-alternatives": [
+      "default",
+      {
+        "role-img-alt": "off",
+        "frame-title": "off"
+      }
+    ],
+    "meta-viewport": "off",
+    "axe/structure": [
+      "default",
+      {
+        "listitem": "off",
+        "list": "off"
+      }
+    ],
+    "disown-opener": "off",
+    "axe/parsing": [
+      "default",
+      {
+        "duplicate-id": "off",
+        "duplicate-id-active": "off"
+      }
+    ],
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "scrollbar-width",
+          "scrollbar-color",
+          "scrollbar-width: thin",
+          "backdrop-filter",
+          "scrollbar-gutter",
+          "scrollbar-gutter: stable",
+          "-webkit-overflow-scrolling",
+          "overscroll-behavior",
+          "overscroll-behavior: none",
+          "user-select",
+          "scrollbar-width: none",
+          "min-height: auto",
+          "-webkit-backdrop-filter",
+          "image-rendering: crisp-edges",
+          "-webkit-text-size-adjust",
+          "text-wrap: balance"
+        ]
+      }
+    ],
+    "no-inline-styles": "off",
+    "typescript-config/consistent-casing": "off"
+  }
+}

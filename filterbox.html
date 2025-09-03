@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>filter-button</title>
+</head>
+<style>
+    .filter_box {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      max-width: 100%;
+    }
+    #filterButton {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #000000;
+      font-weight: 600;
+      font-size: 16px;
+      background: #ffffff;
+      padding: 6px 12px;
+      margin-top: 15px;
+      margin-left: 8.9px;
+      border: none;
+      border-top:1.5px solid #6868af;
+      border-bottom:1.5px solid #6868af;
+      cursor:pointer;
+    }
+    
+    #filterIcon {
+      transition: transform 0.3s;
+    }
+    
+    #filterDropdown {
+      display: none;
+      position: absolute;
+      top: 110%;
+      left: 0;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #e6dada;
+      border-radius: 10px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 1000px;
+      padding: 20px;
+      z-index: 100;
+      overflow-x: auto;
+    }
+    
+    .exam-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-auto-rows: auto;
+      gap: 30px;
+      padding: 10px 0;
+      width: 100%;
+    }
+    
+    .exam-category {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 15px;
+      min-width: 160px;
+      word-wrap: break-word;
+    }
+    
+    .exam-category strong {
+      margin-bottom: 8px;
+      font-size: 16px;
+      color: #201616;
+    }
+    
+    .exam-category label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      flex-wrap: nowrap;
+      position:relative;
+    }
+    
+    .exam-category span {
+      color: #333;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    
+    .exam-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #201616;
+      border-radius: 2px;
+    }
+    
+    /* FIXED ORANGE DOT - ALWAYS PERFECTLY ROUND */
+    .orange-dot {
+        width: 12px;
+        height: 12px;
+        min-width: 12px;
+        min-height: 12px;
+        max-width: 12px;
+        max-height: 12px;
+        background-color: #ff4d00;
+        border-radius: 50%;
+        box-shadow: 0 0 4px 2px #ff4d00;
+        animation: pulse-fixed 1.5s infinite ease-in-out;
+        cursor: pointer;
+        margin-left: 8px;
+        position: relative;
+        z-index: 10;
+        flex-shrink: 0;
+        display: inline-block;
+    }
+    
+    @keyframes pulse-fixed {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+    
+    /* MAIN POPUP CARDS */
+    .popup-card {
+        display: none;
+        position: fixed;
+        width: 250px;
+        height: 120px; 
+        min-width: 200px;
+        min-height: 100px; 
+        max-width: 400px;
+        max-height: 300px;
+        background-color: white;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        z-index: 9999;
+        padding: 10px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+    .popup-card.show {
+        display: block;
+    }
+    
+    /* SEPARATE DETAILS CARDS */
+    .details-card {
+        display: none;
+        position: fixed;
+        width: 380px;
+        height: 450px; 
+        min-width: 320px;
+        min-height: 300px; 
+        max-width: 550px;
+        max-height: 650px;
+        background-color: #f9f9f9;
+        border: 2px solid #007bff;
+        border-radius: 8px;
+        z-index: 10000;
+        padding: 15px;
+        box-sizing: border-box;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .details-card.show {
+        display: block;
+    }
+    
+    .card-content {
+        width: 100%;
+        height: calc(100% - 40px);
+        font-family: Arial, sans-serif;
+        color: #333;
+        line-height: 1.4;
+        overflow-y: auto;
+        padding-top: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    /* DETAILS CARD CONTENT - IMPROVED SIZING AND SCROLLING */
+    .details-content {
+        width: 100%;
+        height: calc(100% - 35px);
+        font-family: Arial, sans-serif;
+        color: #333;
+        line-height: 1.4;
+        overflow-y: auto;
+        padding: 30px 15px 10px 15px; /* Reduced from 45px to 30px */
+        font-size: 14px;
+        margin-top: 3px; /* Reduced from 5px to 3px */
+    }
+    
+    /* Custom scrollbar styling */
+    .details-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .details-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .details-content::-webkit-scrollbar-thumb {
+        background: #007bff;
+        border-radius: 4px;
+    }
+    
+    .details-content::-webkit-scrollbar-thumb:hover {
+        background: #0056b3;
+    }
+    
+    .details-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40px; /* Increased from 35px */
+        background: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 15px; /* Increased horizontal padding */
+        font-weight: bold;
+        font-size: 14px;
+        cursor: move;
+        z-index: 1; /* Ensure header stays above content */
+    }
+    
+    .close-details-btn {
+        background: none;
+        color: white;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+    
+    .close-details-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .exam-info-separate {
+        margin-bottom: 8px; /* Increased from 6px */
+        font-size: 13px; /* Increased from 11px */
+        line-height: 1.4; /* Increased from 1.3 */
+    }
+    
+    .exam-list-detail-separate {
+        margin: 8px 0; /* Increased from 6px */
+        padding-left: 18px; /* Increased from 15px */
+        font-size: 12px; /* Increased from 10px */
+    }
+    
+    .exam-list-detail-separate li {
+        margin-bottom: 4px; /* Increased from 3px */
+    }
+
+    /* CLEAN RESIZE HANDLES */
+    .resize-handle {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+    .resize-handle-n {
+        top: 0;
+        left: 10px;
+        right: 10px;
+        height: 5px;
+        cursor: n-resize;
+    }
+
+    .resize-handle-s {
+        bottom: 0;
+        left: 10px;
+        right: 10px;
+        height: 5px;
+        cursor: s-resize;
+    }
+
+    .resize-handle-w {
+        left: 0;
+        top: 10px;
+        bottom: 10px;
+        width: 5px;
+        cursor: w-resize;
+    }
+    .resize-handle-e {
+        right: 0;
+        top: 10px;
+        bottom: 10px;
+        width: 5px;
+        cursor: e-resize;
+    }
+    .card-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.05);
+        cursor: move;
+        display: flex;
+        flex-direction: column;
+        font-size: 10px;
+        color: #666;
+        border-bottom: 1px solid #ddd;
+        padding: 2px 5px;
+    }
+
+    .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 18px;
+    }
+    .header-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 18px;
+        padding-top: 2px;
+    }
+
+    .header-exam-name {
+        font-weight: bold;
+        color: #000;
+        font-size: 11px;
+    }
+
+    .header-know-link {
+        color: #0066cc;
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 9px;
+        font-weight: normal;
+    }
+    .header-know-link:hover {
+        color: #004499;
+    }
+
+    .drag-handle {
+        display: flex;
+        align-items: center;
+    }
+
+    .language-selector {
+        position: relative;
+        cursor: pointer;
+        color: #0066cc;
+        font-size: 10px;
+    }
+    .language-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 1000;
+        min-width: 80px;
+    }
+
+    .language-selector:hover .language-dropdown {
+        display: block;
+    }
+
+    .language-option {
+        padding: 4px 8px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+    .language-option:hover {
+        background: #f0f0f0;
+    }
+
+@media (max-width: 768px) {
+  #filterDropdown {
+    max-width: 100%;
+    width: 95vw;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+  }
+
+  .exam-list {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+  }
+
+  .exam-category strong,
+  .exam-category span {
+    font-size: 13px;
+  }
+
+  #filterButton {
+    font-size: 16px;
+    margin-left:4.5px;
+  }
+  
+  .details-card {
+    width: 320px;
+    height: 380px;
+  }
+}
+
+@media (max-width: 480px) {
+  .exam-list {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+  }
+
+  .exam-category {
+    min-width: unset;
+  }
+
+  #filterButton {
+    padding: 5px 10px;
+    margin-left:0px;
+    font-size:16px;
+  }
+  
+  .details-card {
+    width: 300px;
+    height: 350px;
+  }
+}
+      
+</style>
+<body>
+    
+  <!-- filter also i want to add  -->
+  <div class="filter_box">
+    <button id="filterButton">
+        Filter
+        <i class="fas fa-chevron-down" id="filterIcon"></i>
+    </button>
+    <div id="filterDropdown">
+        <div class="exam-list">
+            <div class="exam-category">
+              <strong>Banking Exams:</strong>
+              <label><input type="checkbox" class="exam-checkbox"> <span>IBPS PO / Clerk / SO</span><div class="orange-dot" onmouseenter="showCard('ibps', event)" onmouseleave="hideCardDelayed('ibps')" onclick="event.stopPropagation()"></div></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>SBI PO / Clerk</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>RBI Assistant / Grade B</span><div class="orange-dot" onmouseenter="showCard('rbi', event)" onmouseleave="hideCardDelayed('rbi')" onclick="event.stopPropagation()"></div></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>NABARD</span></label>
+            </div>
+            <div class="exam-category">
+              <strong>SSC Exams:</strong>
+              <label><input type="checkbox" class="exam-checkbox"> <span>SSC CGL</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>SSC CHSL</span><div class="orange-dot" onmouseenter="showCard('ssc-chsl', event)" onmouseleave="hideCardDelayed('ssc-chsl')" onclick="event.stopPropagation()"></div></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>SSC MTS</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>SSC CPO</span><div class="orange-dot" onmouseenter="showCard('ssc-cpo', event)" onmouseleave="hideCardDelayed('ssc-cpo')" onclick="event.stopPropagation()"></div></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>SSC GD Constable</span></label>
+            </div>
+            <div class="exam-category">
+              <strong>Railway Exams:</strong>
+              <label><input type="checkbox" class="exam-checkbox"> <span>RRB NTPC</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>RRB Group D</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>RRB JE</span><div class="orange-dot" onmouseenter="showCard('rrb-je', event)" onmouseleave="hideCardDelayed('rrb-je')" onclick="event.stopPropagation()"></div></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>RPF Constable / SI</span></label>
+            </div>
+            <div class="exam-category">
+              <strong>Defence Exams:</strong>
+              <label><input type="checkbox" class="exam-checkbox"> <span>NDA</span><div class="orange-dot" onmouseenter="showCard('nda', event)" onmouseleave="hideCardDelayed('nda')" onclick="event.stopPropagation()"></div></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>CDS</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>AFCAT</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>Indian Coast Guard</span></label>
+            </div>
+            <div class="exam-category">
+              <strong>UPSC / State PSC:</strong>
+              <label><input type="checkbox" class="exam-checkbox"> <span>UPSC Civil Services</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>State PSCs</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>EPFO Enforcement Officer</span></label>
+            </div>
+            <div class="exam-category">
+              <strong>Teaching Exams:</strong>
+              <label><input type="checkbox" class="exam-checkbox"> <span>CTET / STET</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>DSSSB / KVS / NVS</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>UGC NET</span></label>
+            </div>
+            <div class="exam-category">
+              <strong>Insurance Exams:</strong>
+              <label><input type="checkbox" class="exam-checkbox"> <span>LIC AAO / ADO</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>NIACL AO</span></label>
+              <label><input type="checkbox" class="exam-checkbox"> <span>UIIC AO</span></label>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+<!-- MAIN POPUP CARDS -->
+<div id="card-ibps" class="popup-card" onmouseenter="keepCardOpen('ibps')" onmouseleave="hideCardDelayed('ibps')">
+  <div class="card-header">
+      <div class="header-row">
+          <div class="drag-handle">📊 Drag to move</div>
+          <div class="language-selector">
+              Select Language
+              <div class="language-dropdown">
+                  <div class="language-option" onclick="changeLanguage('ibps', 'English')">English</div>
+                  <div class="language-option" onclick="changeLanguage('ibps', 'Hindi')">Hindi</div>
+                  <div class="language-option" onclick="changeLanguage('ibps', 'Tamil')">Tamil</div>
+                  <div class="language-option" onclick="changeLanguage('ibps', 'Telugu')">Telugu</div>
+                  <div class="language-option" onclick="changeLanguage('ibps', 'Marathi')">Marathi</div>
+              </div>
+          </div>
+      </div>
+      <div class="header-title-row">
+          <span class="header-exam-name">IBPS PO/Clerk/SO</span>
+          <span class="header-know-link" onclick="showExamDetails('ibps')">Know About Exam</span>
+      </div>
+  </div>
+  <div class="card-content">
+      <!-- Empty content area -->
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<!-- SEPARATE DETAILS CARD FOR IBPS -->
+<div id="details-card-ibps" class="details-card" onmouseenter="keepCardOpen('ibps')">
+  <div class="details-header">
+      <span>📊 IBPS PO/Clerk/SO Details</span>
+      <button class="close-details-btn" onclick="hideExamDetails('ibps')">&times;</button>
+  </div>
+  <div class="details-content">
+      <div class="exam-info-separate"><strong>Type:</strong> Banking Exam</div>
+      <div class="exam-info-separate"><strong>Frequency:</strong> Annual</div>
+      <div class="exam-info-separate"><strong>Sections:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Quantitative Aptitude</li>
+          <li>Reasoning Ability</li>
+          <li>English Language</li>
+          <li>General Awareness</li>
+          <li>Computer Knowledge</li>
+      </ul>
+      <div class="exam-info-separate"><strong>Duration:</strong> 2 hours</div>
+      <div class="exam-info-separate"><strong>Eligibility:</strong> Graduate in any discipline</div>
+      <div class="exam-info-separate"><strong>Age Limit:</strong> 20-30 years (varies by post)</div>
+      <div class="exam-info-separate"><strong>Selection Process:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Preliminary Examination</li>
+          <li>Main Examination</li>
+          <li>Interview/Group Discussion</li>
+          <li>Document Verification</li>
+      </ul>
+      <div class="exam-info-separate"><strong>Salary Range:</strong> ₹23,700 - ₹42,020 per month</div>
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<div id="card-rbi" class="popup-card" onmouseenter="keepCardOpen('rbi')" onmouseleave="hideCardDelayed('rbi')">
+  <div class="card-header">
+      <div class="header-row">
+          <div class="drag-handle">🏦 Drag to move</div>
+          <div class="language-selector">
+              Select Language
+              <div class="language-dropdown">
+                  <div class="language-option" onclick="changeLanguage('rbi', 'English')">English</div>
+                  <div class="language-option" onclick="changeLanguage('rbi', 'Hindi')">Hindi</div>
+                  <div class="language-option" onclick="changeLanguage('rbi', 'Tamil')">Tamil</div>
+                  <div class="language-option" onclick="changeLanguage('rbi', 'Telugu')">Telugu</div>
+                  <div class="language-option" onclick="changeLanguage('rbi', 'Marathi')">Marathi</div>
+              </div>
+          </div>
+      </div>
+      <div class="header-title-row">
+          <span class="header-exam-name">RBI Assistant/Grade B</span>
+          <span class="header-know-link" onclick="showExamDetails('rbi')">Know About Exam</span>
+      </div>
+  </div>
+  <div class="card-content">
+      <!-- Empty content area -->
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<!-- SEPARATE DETAILS CARD FOR RBI -->
+<div id="details-card-rbi" class="details-card" onmouseenter="keepCardOpen('rbi')">
+  <div class="details-header">
+      <span>🏦 RBI Assistant/Grade B Details</span>
+      <button class="close-details-btn" onclick="hideExamDetails('rbi')">&times;</button>
+  </div>
+  <div class="details-content">
+      <div class="exam-info-separate"><strong>Type:</strong> Central Bank Exam</div>
+      <div class="exam-info-separate"><strong>Frequency:</strong> Irregular</div>
+      <div class="exam-info-separate"><strong>Phases:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Preliminary Exam</li>
+          <li>Main Exam</li>
+          <li>Interview (Grade B)</li>
+      </ul>
+      <div class="exam-info-separate"><strong>Salary:</strong> ₹35,000 - ₹77,000</div>
+      <div class="exam-info-separate"><strong>Eligibility:</strong> Graduate (Assistant), Post Graduate (Grade B)</div>
+      <div class="exam-info-separate"><strong>Age Limit:</strong> 20-28 years (Assistant), 21-30 years (Grade B)</div>
+      <div class="exam-info-separate"><strong>Selection Process:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Preliminary Examination (Assistant)</li>
+          <li>Main Examination</li>
+          <li>Language Proficiency Test</li>
+          <li>Interview (Grade B only)</li>
+      </ul>
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<div id="card-ssc-chsl" class="popup-card" onmouseenter="keepCardOpen('ssc-chsl')" onmouseleave="hideCardDelayed('ssc-chsl')">
+  <div class="card-header">
+      <div class="header-row">
+          <div class="drag-handle">📝 Drag to move</div>
+          <div class="language-selector">
+              Select Language
+              <div class="language-dropdown">
+                  <div class="language-option" onclick="changeLanguage('ssc-chsl', 'English')">English</div>
+                  <div class="language-option" onclick="changeLanguage('ssc-chsl', 'Hindi')">Hindi</div>
+                  <div class="language-option" onclick="changeLanguage('ssc-chsl', 'Tamil')">Tamil</div>
+                  <div class="language-option" onclick="changeLanguage('ssc-chsl', 'Telugu')">Telugu</div>
+                  <div class="language-option" onclick="changeLanguage('ssc-chsl', 'Marathi')">Marathi</div>
+              </div>
+          </div>
+      </div>
+      <div class="header-title-row">
+          <span class="header-exam-name">SSC CHSL</span>
+          <span class="header-know-link" onclick="showExamDetails('ssc-chsl')">Know About Exam</span>
+      </div>
+  </div>
+  <div class="card-content">
+      <!-- Empty content area -->
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<!-- SEPARATE DETAILS CARD FOR SSC CHSL -->
+<div id="details-card-ssc-chsl" class="details-card" onmouseenter="keepCardOpen('ssc-chsl')">
+  <div class="details-header">
+      <span>📝 SSC CHSL Details</span>
+      <button class="close-details-btn" onclick="hideExamDetails('ssc-chsl')">&times;</button>
+  </div>
+  <div class="details-content">
+      <div class="exam-info-separate"><strong>Type:</strong> Government Job</div>
+      <div class="exam-info-separate"><strong>Full Form:</strong> Combined Higher Secondary Level</div>
+      <div class="exam-info-separate"><strong>Posts:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Lower Divisional Clerk</li>
+          <li>Junior Secretorial Assistant</li>
+          <li>Postal Assistant</li>
+          <li>Data Entry Operator</li>
+      </ul>
+      <div class="exam-info-separate"><strong>Age Limit:</strong> 18-27 years</div>
+      <div class="exam-info-separate"><strong>Eligibility:</strong> 12th Pass from recognized board</div>
+      <div class="exam-info-separate"><strong>Selection Process:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Computer Based Examination (Tier-I)</li>
+          <li>Descriptive Paper (Tier-II)</li>
+          <li>Skill Test/Typing Test (Tier-III)</li>
+          <li>Document Verification</li>
+      </ul>
+      <div class="exam-info-separate"><strong>Salary Range:</strong> ₹19,900 - ₹63,200 per month</div>
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<div id="card-ssc-cpo" class="popup-card" onmouseenter="keepCardOpen('ssc-cpo')" onmouseleave="hideCardDelayed('ssc-cpo')">
+  <div class="card-header">
+      <div class="header-row">
+          <div class="drag-handle">👮 Drag to move</div>
+          <div class="language-selector">
+              Select Language
+              <div class="language-dropdown">
+                  <div class="language-option" onclick="changeLanguage('ssc-cpo', 'English')">English</div>
+                  <div class="language-option" onclick="changeLanguage('ssc-cpo', 'Hindi')">Hindi</div>
+                  <div class="language-option" onclick="changeLanguage('ssc-cpo', 'Tamil')">Tamil</div>
+                  <div class="language-option" onclick="changeLanguage('ssc-cpo', 'Telugu')">Telugu</div>
+                  <div class="language-option" onclick="changeLanguage('ssc-cpo', 'Marathi')">Marathi</div>
+              </div>
+          </div>
+      </div>
+      <div class="header-title-row">
+          <span class="header-exam-name">SSC CPO</span>
+          <span class="header-know-link" onclick="showExamDetails('ssc-cpo')">Know About Exam</span>
+      </div>
+  </div>
+  <div class="card-content">
+      <!-- Empty content area -->
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<!-- SEPARATE DETAILS CARD FOR SSC CPO -->
+<div id="details-card-ssc-cpo" class="details-card" onmouseenter="keepCardOpen('ssc-cpo')">
+  <div class="details-header">
+      <span>👮 SSC CPO Details</span>
+      <button class="close-details-btn" onclick="hideExamDetails('ssc-cpo')">&times;</button>
+  </div>
+  <div class="details-content">
+      <div class="exam-info-separate"><strong>Type:</strong> Police Force Exam</div>
+      <div class="exam-info-separate"><strong>Full Form:</strong> Central Police Organization</div>
+      <div class="exam-info-separate"><strong>Forces:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>CAPF (Assistant Commandant)</li>
+          <li>CISF</li>
+          <li>BSF</li>
+          <li>CRPF</li>
+      </ul>
+      <div class="exam-info-separate"><strong>Physical Test:</strong> Required</div>
+      <div class="exam-info-separate"><strong>Eligibility:</strong> Graduate in any discipline</div>
+      <div class="exam-info-separate"><strong>Age Limit:</strong> 20-25 years (varies by category)</div>
+      <div class="exam-info-separate"><strong>Selection Process:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Computer Based Examination (Paper-I)</li>
+          <li>Computer Based Examination (Paper-II)</li>
+          <li>Physical Standard Test (PST)</li>
+          <li>Physical Endurance Test (PET)</li>
+          <li>Medical Examination</li>
+      </ul>
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<div id="card-rrb-je" class="popup-card" onmouseenter="keepCardOpen('rrb-je')" onmouseleave="hideCardDelayed('rrb-je')">
+  <div class="card-header">
+      <div class="header-row">
+          <div class="drag-handle">🚂 Drag to move</div>
+          <div class="language-selector">
+              Select Language
+              <div class="language-dropdown">
+                  <div class="language-option" onclick="changeLanguage('rrb-je', 'English')">English</div>
+                  <div class="language-option" onclick="changeLanguage('rrb-je', 'Hindi')">Hindi</div>
+                  <div class="language-option" onclick="changeLanguage('rrb-je', 'Tamil')">Tamil</div>
+                  <div class="language-option" onclick="changeLanguage('rrb-je', 'Telugu')">Telugu</div>
+                  <div class="language-option" onclick="changeLanguage('rrb-je', 'Marathi')">Marathi</div>
+              </div>
+          </div>
+      </div>
+      <div class="header-title-row">
+          <span class="header-exam-name">RRB JE</span>
+          <span class="header-know-link" onclick="showExamDetails('rrb-je')">Know About Exam</span>
+      </div>
+  </div>
+  <div class="card-content">
+      <!-- Empty content area -->
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<!-- SEPARATE DETAILS CARD FOR RRB JE -->
+<div id="details-card-rrb-je" class="details-card" onmouseenter="keepCardOpen('rrb-je')">
+  <div class="details-header">
+      <span>🚂 RRB JE Details</span>
+      <button class="close-details-btn" onclick="hideExamDetails('rrb-je')">&times;</button>
+  </div>
+  <div class="details-content">
+      <div class="exam-info-separate"><strong>Type:</strong> Railway Technical Exam</div>
+      <div class="exam-info-separate"><strong>Full Form:</strong> Junior Engineer</div>
+      <div class="exam-info-separate"><strong>Branches:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Civil Engineering</li>
+          <li>Mechanical Engineering</li>
+          <li>Electrical Engineering</li>
+          <li>Electronics & Telecom</li>
+      </ul>
+      <div class="exam-info-separate"><strong>Salary:</strong> ₹35,400 - ₹1,12,400</div>
+      <div class="exam-info-separate"><strong>Eligibility:</strong> Engineering Degree/Diploma in relevant discipline</div>
+      <div class="exam-info-separate"><strong>Age Limit:</strong> 18-33 years (varies by category)</div>
+      <div class="exam-info-separate"><strong>Selection Process:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Computer Based Test (CBT-1)</li>
+          <li>Computer Based Test (CBT-2)</li>
+          <li>Document Verification</li>
+          <li>Medical Examination</li>
+      </ul>
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<div id="card-nda" class="popup-card" onmouseenter="keepCardOpen('nda')" onmouseleave="hideCardDelayed('nda')">
+  <div class="card-header">
+      <div class="header-row">
+          <div class="drag-handle">⚔️ Drag to move</div>
+          <div class="language-selector">
+              Select Language
+              <div class="language-dropdown">
+                  <div class="language-option" onclick="changeLanguage('nda', 'English')">English</div>
+                  <div class="language-option" onclick="changeLanguage('nda', 'Hindi')">Hindi</div>
+                  <div class="language-option" onclick="changeLanguage('nda', 'Tamil')">Tamil</div>
+                  <div class="language-option" onclick="changeLanguage('nda', 'Telugu')">Telugu</div>
+                  <div class="language-option" onclick="changeLanguage('nda', 'Marathi')">Marathi</div>
+              </div>
+          </div>
+      </div>
+      <div class="header-title-row">
+          <span class="header-exam-name">NDA</span>
+          <span class="header-know-link" onclick="showExamDetails('nda')">Know About Exam</span>
+      </div>
+  </div>
+  <div class="card-content">
+      <!-- Empty content area -->
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<!-- SEPARATE DETAILS CARD FOR NDA -->
+<div id="details-card-nda" class="details-card" onmouseenter="keepCardOpen('nda')">
+  <div class="details-header">
+      <span>⚔️ NDA Details</span>
+      <button class="close-details-btn" onclick="hideExamDetails('nda')">&times;</button>
+  </div>
+  <div class="details-content">
+      <div class="exam-info-separate"><strong>Type:</strong> Defence Academy Exam</div>
+      <div class="exam-info-separate"><strong>Full Form:</strong> National Defence Academy</div>
+      <div class="exam-info-separate"><strong>Services:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Indian Army</li>
+          <li>Indian Navy</li>
+          <li>Indian Air Force</li>
+      </ul>
+      <div class="exam-info-separate"><strong>Age Limit:</strong> 16.5 - 19.5 years</div>
+      <div class="exam-info-separate"><strong>Training:</strong> 3 years at NDA + 1 year at respective academy</div>
+      <div class="exam-info-separate"><strong>Eligibility:</strong> 12th Pass (PCM for Air Force & Navy)</div>
+      <div class="exam-info-separate"><strong>Selection Process:</strong></div>
+      <ul class="exam-list-detail-separate">
+          <li>Written Examination (Mathematics & GAT)</li>
+          <li>SSB Interview (5 days)</li>
+          <li>Medical Examination</li>
+          <li>Final Merit List</li>
+      </ul>
+  </div>
+  <div class="resize-handle resize-handle-n"></div>
+  <div class="resize-handle resize-handle-s"></div>
+  <div class="resize-handle resize-handle-w"></div>
+  <div class="resize-handle resize-handle-e"></div>
+</div>
+
+<script>
+// Filter functionality
+const filterBox = document.querySelector('.filter_box');
+const filterButton = document.getElementById('filterButton');
+const filterIcon = document.getElementById('filterIcon');
+const filterDropdown = document.getElementById('filterDropdown');
+const allCards = document.querySelectorAll('.popup-card');
+const allDetailsCards = document.querySelectorAll('.details-card');
+
+let hideTimeouts = {};
+let currentLanguage = {};
+let activeExams = {}; // Track which exams have active details cards
+
+function closeAllCards() {
+    allCards.forEach(card => card.classList.remove('show'));
+    allDetailsCards.forEach(card => card.classList.remove('show'));
+}
+
+function closeFilterAndCards() {
+    filterDropdown.style.display = 'none';
+    filterIcon.style.transform = 'rotate(0deg)';
+    closeAllCards();
+}
+
+filterBox.addEventListener('mouseenter', () => {
+    filterDropdown.style.display = 'block';
+    filterIcon.style.transform = 'rotate(180deg)';
+});
+
+filterBox.addEventListener('mouseleave', (event) => {
+    setTimeout(() => {
+        const isOverFilterBox = filterBox.contains(document.querySelector(':hover'));
+        const isOverAnyCard = Array.from(allCards).some(card => 
+            card.contains(document.querySelector(':hover')) || card.matches(':hover')
+        );
+        const isOverAnyDetailsCard = Array.from(allDetailsCards).some(card => 
+            card.contains(document.querySelector(':hover')) || card.matches(':hover')
+        );
+        
+        if (!isOverFilterBox && !isOverAnyCard && !isOverAnyDetailsCard) {
+            closeFilterAndCards();
+        }
+    }, 100);
+});
+
+filterButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+});
+
+function showCard(examId, event) {
+    if (hideTimeouts[examId]) {
+        clearTimeout(hideTimeouts[examId]);
+        delete hideTimeouts[examId];
+    }
+
+    allCards.forEach(card => {
+        if (card.id !== `card-${examId}`) {
+            card.classList.remove('show');
+        }
+    });
+    
+    const card = document.getElementById(`card-${examId}`);
+    if (card) {
+        const rect = event.target.getBoundingClientRect();
+        card.style.left = (rect.left + 20) + 'px';
+        card.style.top = (rect.top - 20) + 'px';
+        
+        card.classList.add('show');
+        console.log(`Showing card on hover for: ${examId}`);
+    }
+}
+
+function hideCardDelayed(examId) {
+    // Don't hide if details card is open
+    if (activeExams[examId]) {
+        return;
+    }
+    
+    hideTimeouts[examId] = setTimeout(() => {
+        const card = document.getElementById(`card-${examId}`);
+        if (card) {
+            card.classList.remove('show');
+        }
+        delete hideTimeouts[examId];
+    }, 300);
+}
+
+function keepCardOpen(examId) {
+    if (hideTimeouts[examId]) {
+        clearTimeout(hideTimeouts[examId]);
+        delete hideTimeouts[examId];
+    }
+}
+
+function changeLanguage(examId, language) {
+    currentLanguage[examId] = language;
+    console.log(`Changed language for ${examId} to ${language}`);
+    alert(`Language changed to ${language} for ${examId}`);
+}
+
+// NEW SEPARATE DETAILS FUNCTIONS
+function showExamDetails(examId) {
+    const mainCard = document.getElementById(`card-${examId}`);
+    const detailsCard = document.getElementById(`details-card-${examId}`);
+    
+    if (mainCard && detailsCard) {
+        // Position details card next to main card with less space (10px instead of 20px)
+        const mainRect = mainCard.getBoundingClientRect();
+        detailsCard.style.left = (mainRect.right + 10) + 'px'; // Reduced space to 10px
+        detailsCard.style.top = mainRect.top + 'px';
+        
+        detailsCard.classList.add('show');
+        
+        // Mark this exam as having an active details card
+        activeExams[examId] = true;
+    }
+}
+
+function hideExamDetails(examId) {
+    const detailsCard = document.getElementById(`details-card-${examId}`);
+    if (detailsCard) {
+        detailsCard.classList.remove('show');
+        // Remove from active exams
+        delete activeExams[examId];
+    }
+}
+
+// RESIZE AND DRAG FUNCTIONALITY
+let isResizing = false;
+let isDragging = false;
+let currentCard = null;
+let resizeType = '';
+let startX, startY, startWidth, startHeight, startLeft, startTop;
+
+// Add functionality to both main cards and details cards
+const allDraggableCards = [...allCards, ...allDetailsCards];
+
+allDraggableCards.forEach(card => {
+    const handles = card.querySelectorAll('.resize-handle');
+    
+    handles.forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            isResizing = true;
+            currentCard = card;
+            resizeType = handle.classList[1].replace('resize-handle-', '');
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = card.offsetWidth;
+            startHeight = card.offsetHeight;
+            startLeft = card.offsetLeft;
+            startTop = card.offsetTop;
+        });
+    });
+
+    // Add drag functionality
+    const header = card.querySelector('.card-header') || card.querySelector('.details-header');
+    if (header) {
+        header.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.language-selector') || e.target.closest('.header-know-link') || e.target.closest('.close-details-btn')) return;
+            
+            if (!isResizing) {
+                isDragging = true;
+                currentCard = card;
+                startX = e.clientX - card.offsetLeft;
+                startY = e.clientY - card.offsetTop;
+            }
+        });
+    }
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (isResizing && currentCard) {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        switch (resizeType) {
+            case 'n':
+                currentCard.style.height = Math.max(100, startHeight - dy) + 'px';
+                currentCard.style.top = Math.min(startTop + dy, startTop + startHeight - 100) + 'px';
+                break;
+            case 's':
+                currentCard.style.height = Math.max(100, startHeight + dy) + 'px';
+                break;
+            case 'w':
+                currentCard.style.width = Math.max(150, startWidth - dx) + 'px';
+                currentCard.style.left = Math.min(startLeft + dx, startLeft + startWidth - 150) + 'px';
+                break;
+            case 'e':
+                currentCard.style.width = Math.max(150, startWidth + dx) + 'px';
+                break;
+        }
+        
+        updateFontSize(currentCard);
+    } else if (isDragging && currentCard) {
+        currentCard.style.left = (e.clientX - startX) + 'px';
+        currentCard.style.top = (e.clientY - startY) + 'px';
+    }
+});
+
+document.addEventListener('mouseup', () => {
+    isResizing = false;
+    isDragging = false;
+    currentCard = null;
+    resizeType = '';
+});
+
+function updateFontSize(card) {
+    const width = card.offsetWidth;
+    let fontSize;
+    
+    if (width < 200) fontSize = '10px';
+    else if (width < 300) fontSize = '12px';
+    else if (width < 400) fontSize = '14px';
+    else fontSize = '16px';
+    
+    card.style.fontSize = fontSize;
+}
+</script>
+
+</body>
+</html>

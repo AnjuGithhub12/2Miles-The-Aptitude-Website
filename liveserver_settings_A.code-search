@@ -1,0 +1,9 @@
+# Query: liveserver.settings.A
+# ContextLines: 1
+
+1 result - 1 file
+
+\defaultSettings.json:
+  12088  	//  C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window
+  12089: 	"liveServer.settings.AdvanceCustomBrowserCmdLine": "C:\\Program Files\\Firefox Developer Edition\\firefox.exe",
+  12090  
