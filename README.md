@@ -37,7 +37,7 @@ This platform helps **students, job aspirants, and competitive exam candidates**
 ---
 <img width="2714" height="1448" alt="127 0 0 1_5500_entrypage html (3)" src="https://github.com/user-attachments/assets/cdebdaa2-4692-4e00-9c9b-dfa66dbf41a7" />
 ---
-<img width="2714" height="1385" alt="localhost_3000_" src="https://github.com/user-attachments/assets/d2d811a8-5557-4627-825e-2f71b941ecb4" />
+<img width="2714" height="1448" alt="localhost_3000_" src="https://github.com/user-attachments/assets/d2d811a8-5557-4627-825e-2f71b941ecb4" />
 
 
 
